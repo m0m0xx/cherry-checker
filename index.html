@@ -1,0 +1,391 @@
+
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>チェリー方式管理システム</title>
+
+<style>
+body{
+    font-family:sans-serif;
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+textarea{
+    width:100%;
+    height:180px;
+}
+
+select,button{
+    padding:8px;
+    margin:5px;
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:6px;
+}
+
+.ok{
+    color:green;
+    font-weight:bold;
+}
+
+.ng{
+    color:red;
+    font-weight:bold;
+}
+
+.box{
+    border:1px solid #ccc;
+    padding:10px;
+    margin-top:15px;
+}
+</style>
+</head>
+<body>
+
+<h1>チェリー方式管理システム</h1>
+
+<h2>ユニット一覧</h2>
+
+<textarea id="groups"></textarea>
+
+<button onclick="saveGroups()">
+ユニット保存
+</button>
+
+<hr>
+
+<h2>新規エントリー</h2>
+
+<select id="member1"></select>
+<select id="member2"></select>
+
+<button onclick="checkEntry()">
+判定
+</button>
+
+<button onclick="addEntry()">
+追加
+</button>
+
+<div id="result"></div>
+
+<hr>
+
+<h2>現在のエントリー</h2>
+
+<table>
+<thead>
+<tr>
+<th>組</th>
+<th>削除</th>
+</tr>
+</thead>
+<tbody id="entryTable"></tbody>
+</table>
+
+<div class="box">
+<h3>出演可能者</h3>
+<div id="available"></div>
+</div>
+
+<div class="box">
+<h3>出演不可者</h3>
+<div id="banned"></div>
+</div>
+
+<script>
+
+let entries =
+JSON.parse(
+localStorage.getItem("cherry_entries") || "[]"
+);
+
+function saveGroups(){
+
+localStorage.setItem(
+"cherry_groups",
+document.getElementById("groups").value
+);
+
+initialize();
+}
+
+function loadGroups(){
+
+document.getElementById("groups").value =
+localStorage.getItem("cherry_groups") || "";
+}
+
+function buildData(){
+
+const text =
+document.getElementById("groups").value.trim();
+
+const members = new Set();
+
+const unitMap = {};
+
+text.split("\n").forEach(line=>{
+
+const group =
+line.split(",")
+.map(x=>x.trim())
+.filter(x=>x);
+
+group.forEach(person=>{
+
+members.add(person);
+
+unitMap[person] =
+group.filter(x=>x!==person);
+
+});
+
+});
+
+return {members,unitMap};
+}
+
+function getBanned(){
+
+const {unitMap} = buildData();
+
+const banned = {};
+const bannedSet = new Set();
+
+entries.forEach(pair=>{
+
+const a = pair[0];
+const b = pair[1];
+
+[a,b].forEach(person=>{
+
+bannedSet.add(person);
+
+if(!banned[person])
+banned[person] = [];
+
+banned[person].push(
+`${a} × ${b}`
+);
+
+(unitMap[person]||[])
+.forEach(m=>{
+
+bannedSet.add(m);
+
+if(!banned[m])
+banned[m] = [];
+
+banned[m].push(
+`${a} × ${b}`
+);
+
+});
+
+});
+
+});
+
+return {bannedSet,banned};
+}
+
+function populateSelects(){
+
+const {members} = buildData();
+
+const available =
+[...members].sort();
+
+const s1 =
+document.getElementById("member1");
+
+const s2 =
+document.getElementById("member2");
+
+s1.innerHTML="";
+s2.innerHTML="";
+
+available.forEach(name=>{
+
+const o1 =
+new Option(name,name);
+
+const o2 =
+new Option(name,name);
+
+s1.add(o1);
+s2.add(o2);
+
+});
+}
+
+function checkEntry(show=true){
+
+const {unitMap} = buildData();
+
+const {bannedSet,banned}
+= getBanned();
+
+const p1 =
+member1.value;
+
+const p2 =
+member2.value;
+
+let message = "";
+
+if(p1===p2){
+
+message =
+'<span class="ng">同一人物です</span>';
+
+if(show) result.innerHTML=message;
+return false;
+}
+
+if((unitMap[p1]||[])
+.includes(p2)){
+
+message =
+'<span class="ng">同一ユニットです</span>';
+
+if(show) result.innerHTML=message;
+return false;
+}
+
+if(bannedSet.has(p1)){
+
+message =
+`<span class="ng">${p1}は出演不可</span><br>`
++ banned[p1].join("<br>");
+
+if(show) result.innerHTML=message;
+return false;
+}
+
+if(bannedSet.has(p2)){
+
+message =
+`<span class="ng">${p2}は出演不可</span><br>`
++ banned[p2].join("<br>");
+
+if(show) result.innerHTML=message;
+return false;
+}
+
+if(show){
+
+result.innerHTML =
+'<span class="ok">エントリー可能</span>';
+}
+
+return true;
+}
+
+function addEntry(){
+
+if(!checkEntry(false))
+return;
+
+entries.push([
+member1.value,
+member2.value
+]);
+
+localStorage.setItem(
+"cherry_entries",
+JSON.stringify(entries)
+);
+
+render();
+}
+
+function deleteEntry(index){
+
+entries.splice(index,1);
+
+localStorage.setItem(
+"cherry_entries",
+JSON.stringify(entries)
+);
+
+render();
+}
+
+function render(){
+
+populateSelects();
+
+const tbody =
+document.getElementById("entryTable");
+
+tbody.innerHTML="";
+
+entries.forEach((pair,index)=>{
+
+tbody.innerHTML += `
+<tr>
+<td>${pair[0]} × ${pair[1]}</td>
+<td>
+<button onclick="deleteEntry(${index})">
+削除
+</button>
+</td>
+</tr>
+`;
+
+});
+
+const {members} =
+buildData();
+
+const {bannedSet,banned}
+= getBanned();
+
+const available =
+[...members]
+.filter(x=>!bannedSet.has(x))
+.sort();
+
+document.getElementById("available")
+.innerHTML =
+available.join("<br>");
+
+const bannedHtml =
+Object.keys(banned)
+.sort()
+.map(name=>
+`<b>${name}</b><br>
+${banned[name].join("<br>")}`
+)
+.join("<hr>");
+
+document.getElementById("banned")
+.innerHTML =
+bannedHtml;
+}
+
+function initialize(){
+
+render();
+}
+
+loadGroups();
+initialize();
+
+</script>
+
+</body>
+</html>
