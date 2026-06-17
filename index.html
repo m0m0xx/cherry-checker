@@ -16,7 +16,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
 header{text-align:center;margin-bottom:36px}
 .tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:2px 8px;margin-bottom:10px}
-h1{font-size:clamp(20px,5vw,32px);font-weight:900;letter-spacing:-.02em;background:linear-gradient(135deg,var(--text) 40%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 .sub{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.8}
 
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:18px;max-width:680px;margin-left:auto;margin-right:auto}
@@ -26,7 +26,7 @@ h1{font-size:clamp(20px,5vw,32px);font-weight:900;letter-spacing:-.02em;backgrou
 .fmt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px}
 .fmt-btn{padding:12px 4px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:.15s}
 .fmt-btn:hover{border-color:var(--accent2);color:var(--text)}
-.fmt-btn.active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--card));color:var(--accent)}
+.fmt-btn.active{border-color:var(--accent);background:#2e1a24;color:var(--accent)}
 .fmt-sub{font-size:10px;font-weight:400;color:var(--muted);display:block;margin-top:2px}
 .custom-wrap{display:none;align-items:center;gap:8px;margin-top:10px}
 .custom-wrap.on{display:flex}
@@ -43,18 +43,18 @@ h1{font-size:clamp(20px,5vw,32px);font-weight:900;letter-spacing:-.02em;backgrou
 /* PERFORMER CARDS */
 #performersWrap{margin-top:16px;display:flex;flex-direction:column;gap:14px}
 .perf-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden}
-.perf-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--accent2) 5%,var(--card))}
+.perf-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);background:#1e1e2e}
 .perf-num{width:26px;height:26px;border-radius:50%;background:var(--accent2);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .perf-name-input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;outline:none;transition:.15s}
 .perf-name-input:focus{border-color:var(--accent2)}
 .perf-name-input::placeholder{color:var(--muted);font-weight:400}
 .perf-body{padding:12px 14px}
 
-/* TEAM BLOCKS */
+/* UNIT BLOCKS */
 .teams-section-label{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.6}
 .team-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px}
 .team-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.team-label-badge{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--accent2);background:color-mix(in srgb,var(--accent2) 12%,var(--bg));border:1px solid color-mix(in srgb,var(--accent2) 25%,transparent);border-radius:4px;padding:2px 6px;white-space:nowrap}
+.team-label-badge{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--accent2);background:#1e1a2e;border:1px solid #3a2a5a;border-radius:4px;padding:2px 6px;white-space:nowrap}
 .team-name-input{flex:1;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:.15s}
 .team-name-input:focus{border-color:var(--accent2)}
 .team-name-input::placeholder{color:var(--muted)}
@@ -73,36 +73,36 @@ h1{font-size:clamp(20px,5vw,32px);font-weight:900;letter-spacing:-.02em;backgrou
 .btn-add-team:hover{border-color:var(--accent2);color:var(--accent2)}
 
 /* PRIMARY BTN */
-.btn-primary{display:block;width:100%;padding:13px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-top:18px;letter-spacing:.03em;transition:opacity .15s}
+.btn-primary{display:block;width:100%;padding:13px;border:none;border-radius:8px;background:#c0346a;color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-top:18px;letter-spacing:.03em;transition:opacity .15s}
 .btn-primary:hover{opacity:.88}
 .btn-ghost{padding:5px 11px;border:1.5px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);font-family:inherit;font-size:12px;cursor:pointer;transition:.15s}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
 
 /* RESULT */
 .result-box{border-radius:9px;padding:14px 18px;margin-top:14px;display:none;font-size:13px;line-height:1.8}
-.result-box.ok{display:block;background:color-mix(in srgb,var(--ok) 10%,var(--card));border:1.5px solid var(--ok)}
-.result-box.ng{display:block;background:color-mix(in srgb,var(--accent) 10%,var(--card));border:1.5px solid var(--accent)}
+.result-box.ok{display:block;background:#162416;border:1.5px solid var(--ok)}
+.result-box.ng{display:block;background:#2a1420;border:1.5px solid var(--accent)}
 .result-box .icon{font-size:20px;margin-bottom:4px}
 
 /* LIST */
 .entry-list{list-style:none}
 .entry-item{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-bottom:1px solid var(--border)}
 .entry-item:last-child{border-bottom:none}
-.entry-badge{flex-shrink:0;font-size:9px;font-weight:700;letter-spacing:.1em;padding:2px 7px;border-radius:4px;background:color-mix(in srgb,var(--accent2) 14%,var(--card));color:var(--accent2);margin-top:2px}
+.entry-badge{flex-shrink:0;font-size:9px;font-weight:700;letter-spacing:.1em;padding:2px 7px;border-radius:4px;background:#1e1a2e;color:var(--accent2);margin-top:2px}
 .entry-info{flex:1;min-width:0}
 .entry-unit{font-weight:700;font-size:14px}
 .entry-names{font-size:12px;color:var(--muted);margin-top:2px}
-.entry-teams{font-size:11px;color:color-mix(in srgb,var(--accent2) 70%,var(--muted));margin-top:2px;word-break:break-all;line-height:1.6}
+.entry-teams{font-size:11px;color:#8866cc;margin-top:2px;word-break:break-all;line-height:1.6}
 
 /* BLOCKED */
-.blocked-chip{display:inline-flex;flex-direction:column;gap:2px;background:color-mix(in srgb,var(--accent) 10%,var(--card));border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:7px;padding:7px 12px;margin:4px 4px 4px 0;font-size:13px;vertical-align:top}
+.blocked-chip{display:inline-flex;flex-direction:column;gap:2px;background:#2a1420;border:1px solid #5a2a3a;border-radius:7px;padding:7px 12px;margin:4px 4px 4px 0;font-size:13px;vertical-align:top}
 .b-name{font-weight:700}
 .b-reason{font-size:11px;color:var(--muted)}
 .no-data{text-align:center;color:var(--muted);font-size:13px;padding:24px 0}
 .clear-row{display:flex;justify-content:flex-end;margin-bottom:10px}
 
 /* RULE BOX */
-.rule-box{background:color-mix(in srgb,var(--accent2) 6%,var(--card));border:1px solid color-mix(in srgb,var(--accent2) 20%,transparent);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.8}
+.rule-box{background:#1a1a2e;border:1px solid #2e2a4e;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.8}
 .rule-box strong{color:var(--text)}
 
 @media(max-width:480px){.fmt-grid{grid-template-columns:repeat(2,1fr)}}
