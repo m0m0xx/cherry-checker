@@ -323,87 +323,30 @@ function getAllAppearances(allEntries) {
   return apps;
 }
 
-// 渡されたエントリーリスト全体にルール違反がないかをチェック
-function checkViolations(allEntries) {
-  const apps = getAllAppearances(allEntries);
-  const violations = [];
-
-  // 1. 出演回数チェック（1人最大2回まで。ピン、コンビ等問わず）
-  apps.forEach((userApps, name) => {
-    if (userApps.length > 2) {
-      violations.push({
-        name: name,
-        reason: `1人の最大出演数は2回までです（現在 ${userApps.length} 回指定されています）。`
-      });
-    }
-  });
-
-  // 2. またぎ演者（出演回数がちょうど2回の人）を特定
-  const matagiSet = new Set();
-  apps.forEach((userApps, name) => {
-    if (userApps.length === 2) {
-      matagiSet.add(name);
-    }
-  });
-
-  // 3. 各ユニット内にまたぎ演者（出演2回の人）が複数人同居していないかチェック
-  const unitMatagis = new Map(); // unitId -> Set(names)
-  apps.forEach((userApps, name) => {
-    userApps.forEach(app => {
-      if (app.isGroup && matagiSet.has(name)) {
-        if (!unitMatagis.has(app.id)) unitMatagis.set(app.id, new Set());
-        unitMatagis.get(app.id).add(name);
-      }
-    });
-  });
-
-  unitMatagis.forEach((mSet, unitId) => {
-    if (mSet.size >= 2) {
-      const matagis = Array.from(mSet);
-      violations.push({
-        name: matagis[0],
-        reason: `チェリー方式に抵触：同じユニット内に、すでに2回出演しているメンバー（${matagis.join('、')}）が複数含まれるため、これ以上のエントリーはできません。`
-      });
-    }
-  });
-
-  return violations;
-}
-
-// 登録済みデータから「今後これ以上どこにも追加登録できない人」をシミュレーション計算
+// 登録済みデータから「出演不可者」をリアルタイム計算
 function calcBlockedNames(){
   const blocked = new Map();
-  const currentApps = getAllAppearances(entries);
-  const allNames = Array.from(currentApps.keys());
-
-  allNames.forEach(name => {
-    const userApps = currentApps.get(name) || [];
-    
-    // もしこの人が「新しい別のコンビ」に登録しようとしたらどうなるかを仮テスト
-    const fakeEntry = {
-      id: 'fake_check_' + Date.now(),
-      memberDetails: [
-        { name: name, teams: [] },
-        { name: 'VIRTUAL_PARTNER_' + name, teams: [] }
-      ]
-    };
-    
-    const testEntries = [...entries, fakeEntry];
-    const violations = checkViolations(testEntries);
-    
-    // 自分に関わる違反、または自分が原因で連鎖が起きた場合はブロック対象
-    const myViolation = violations.find(v => v.name === name || v.reason.includes(name));
-    if (myViolation) {
-      let reason = "";
-      if (userApps.length >= 2) {
-        reason = "すでに2つの枠に出演しているため";
-      } else {
-        reason = "これ以上エントリーするとチェリー方式に抵触するため";
-      }
-      blocked.set(name, reason);
+  const apps = getAllAppearances(entries);
+  
+  apps.forEach((userApps, performer)=>{
+    // 2回以上出演が確定している人を対象にする
+    if(userApps.length >= 2){
+      // 2回出ている本人も、3回目は出られないのでブロック
+      blocked.set(performer, "すでに2つの枠に出演しているため");
+      
+      // その人の相方（同じユニットのメンバー）を全員永久ブロック
+      userApps.forEach(app=>{
+        app.mates.forEach(mate=>{
+          if(mate !== performer){
+            blocked.set(
+              mate,
+              `${performer} が2回出演しているため`
+            );
+          }
+        });
+      });
     }
   });
-
   return blocked;
 }
 
@@ -421,28 +364,26 @@ function doCheck(){
     || validNames.join('・')
     || `エントリー${entries.length+1}`;
 
-  // 今の入力内容を仮のエントリーオブジェクトにして、既存データと合体させてシミュレーション
-  const newEntry = { id: Date.now()+'', label, memberDetails };
-  const testEntries = [...entries, newEntry];
-  const violations = checkViolations(testEntries);
-
   const box = document.getElementById('resultBox');
 
-  if(violations.length){
-    box.className = 'result-box ng';
-    const uniqueReasons = Array.from(new Set(violations.map(v => v.reason)));
-    box.innerHTML = `
-      <div class="icon">🚫</div>
-      <strong>制限ルールに抵触しています</strong>
-      <div style="border-top:1px solid #ffd0d9;margin:8px 0"></div>
-      ${uniqueReasons.map(r => `
+  // 【出演不可者リスト方式】での即時判定
+  const blocked = calcBlockedNames();
+  for(const member of memberDetails){
+    if(blocked.has(member.name)){
+      box.className = 'result-box ng';
+      box.innerHTML = `
+        <div class="icon">🚫</div>
+        <strong>出演できません</strong>
+        <div style="border-top:1px solid #ffd0d9;margin:8px 0"></div>
         <div style="margin-bottom:8px; font-size:12px;">
-          <span style="color:var(--accent); font-weight:700">• 判定NG：</span>${r}
-        </div>`).join('')}`;
-    return;
+          <span style="color:var(--accent); font-weight:700">• 判定NG：</span>${member.name} は ${blocked.get(member.name)}
+        </div>`;
+      return;
+    }
   }
 
   // 違反がなければ正式に保存
+  const newEntry = { id: Date.now()+'', label, memberDetails };
   entries.push(newEntry);
   save();
 
