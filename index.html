@@ -118,7 +118,7 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
   <div class="panel-title">Step 2 ／ 出演者を入力</div>
 
   <div style="margin-bottom:16px">
-    <span class="field-label">エントリー名（コンビ名・ユニット名など、任意）</span>
+    <span class="field-label">エントリー名（コンビ名・ユニット名・芸名など）</span>
     <input type="text" class="field-input" id="entryName" placeholder="例：ミルクボーイ、ななまがり など">
   </div>
 
@@ -174,7 +174,7 @@ function buildForm(n){
       <div class="perf-header">
         <div class="perf-num">${i+1}</div>
         <input class="perf-code-input" id="pcode_${i}" type="text" placeholder="学籍番号">
-        <input class="perf-name-input" id="pname_${i}" type="text" placeholder="お名前">
+        <input class="perf-name-input" id="pname_${i}" type="text" placeholder="名前">
       </div>`;
     wrap.appendChild(card);
   }
@@ -247,7 +247,7 @@ function calcBlockedNames(){
 /* ===== CHECK & REGISTER ===== */
 function doCheck(){
   const memberDetails = collectForm();
-  if(!memberDetails.length){ alert('出演者の「学籍番号」と「お名前」を入力してください。'); return; }
+  if(!memberDetails.length){ alert('出演者の「学籍番号」と「名前」を入力してください。'); return; }
 
   const codes = memberDetails.map(m => m.code);
   if(new Set(codes).size !== codes.length){
