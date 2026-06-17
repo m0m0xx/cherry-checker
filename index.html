@@ -213,7 +213,7 @@ function buildForm(n){
       </div>
       <div class="perf-body">
         <div class="teams-section-label">
-          ▸ この人が普段組んでいるユニットを入力<br>
+          ▸ 他に組んでいるユニットを入力<br>
           <span style="font-size:10px">ユニット名と相方の本名フルネームを入力してください。複数ユニットあれば「ユニットを追加」。</span>
         </div>
         <div id="tlist_${i}"></div>
@@ -275,112 +275,57 @@ function collectForm(){
 /* ========================================
    チェリー方式 コアロジック
 
-   【blocked セットの計算方法】
-   全登録エントリーを走査し：
-   ある人 X が 2つ以上の異なるエントリーに出演している場合
-   → X と同じチームに所属する人（X の相方）は出演不可
-
-   具体的には：
-   1. 各エントリーの出演者リストを集める
-   2. 出演者 X がどのエントリーに出ているか調べる
-   3. X が複数エントリーにいる → X の全チームの相方を blocked に追加
-      （ただし X 自身は出演できる。出られないのは相方側）
-
-   ※ チェリー方式の根本：
-      「片方が2組目に出る → 残った相方は出られない」
-      つまり blocked = 「2組以上に出ている人の、全チームの相方全員」
+   ルール：
+   - 1人が2つのエントリーに出ることはOK
+   - ある人Xが2つのエントリーに出ている場合
+     → Xの各エントリーでの相方は、追加エントリーに出演不可
+   - つまり blocked = 「すでに2組に出ている人の、その2組それぞれの相方全員」
    ======================================== */
+
+// 登録済みエントリーから「出演不可者」を計算
+// 返り値: Map<name, reason>
 function calcBlockedNames(){
-  // person -> 出演しているエントリーラベルリスト
-  const personEntries = new Map(); // name -> [entryLabel, ...]
+  // 各人が出演しているエントリー一覧を集計
+  const personEntries = new Map(); // name -> [entry, ...]
 
   entries.forEach(entry=>{
     entry.memberDetails.forEach(md=>{
       if(!md.name) return;
       if(!personEntries.has(md.name)) personEntries.set(md.name,[]);
-      personEntries.get(md.name).push(entry.label);
+      personEntries.get(md.name).push(entry);
     });
   });
 
-  // blocked: Map<name, reason string>
   const blocked = new Map();
 
   // 2つ以上のエントリーに出ている人を探す
-  personEntries.forEach((entryLabels, personName)=>{
-    if(entryLabels.length < 2) return;
-    // この人は複数エントリーに出ている → 全チームの相方が出演不可
-    entries.forEach(entry=>{
+  personEntries.forEach((entryList, personName)=>{
+    if(entryList.length < 2) return;
+    // この人は2組に出ている → 各エントリーの相方が出演不可
+    const labels = entryList.map(e=>e.label).join('・');
+    entryList.forEach(entry=>{
       const md = entry.memberDetails.find(m=>m.name===personName);
       if(!md) return;
       md.teams.forEach(team=>{
         team.mates.forEach(mate=>{
-          if(!mate) return;
-          const reason = `${personName} さんが複数エントリー（${entryLabels.join('・')}）に出演するため`;
+          if(!mate || mate===personName) return;
+          const reason = `${personName} さんが「${labels}」の2組に出演するため`;
           if(!blocked.has(mate)) blocked.set(mate, reason);
         });
       });
     });
   });
 
-  return blocked; // Map<name, reason>
+  return blocked;
 }
 
 /* 新規エントリー候補をチェック */
 function checkCanEnter(newMemberDetails){
+  // 既存エントリーだけでblocked計算（新エントリーは含めない）
   const blocked = calcBlockedNames();
-  const violations = [];
-
-  // ① 既存blockedに新メンバーが含まれていないか
-  newMemberDetails.forEach(md=>{
-    if(!md.name) return;
-    if(blocked.has(md.name)){
-      violations.push({ name: md.name, reason: blocked.get(md.name) });
-    }
-  });
-
-  // ② 新エントリーに入る人が既存エントリーにもいる場合
-  //    → その人の相方（既存エントリーに登録済み）がすでにいる
-  //    → 新エントリーの他のメンバーがその相方かどうかチェック
-  const newNames = newMemberDetails.map(m=>m.name).filter(Boolean);
-
-  newMemberDetails.forEach(newMd=>{
-    if(!newMd.name) return;
-
-    // この人が既存エントリーに出ている？
-    const existingEntry = entries.find(e=>
-      e.memberDetails.some(m=>m.name===newMd.name)
-    );
-    if(!existingEntry) return;
-
-    // 既存エントリーでの相方を取得
-    const existingMd = existingEntry.memberDetails.find(m=>m.name===newMd.name);
-    existingMd?.teams.forEach(team=>{
-      team.mates.forEach(mate=>{
-        // 相方が今回の新エントリーに含まれていたらNG
-        if(newNames.includes(mate)){
-          const reason = `${newMd.name} さんのチーム「${team.unitName||'—'}」の相方（「${existingEntry.label}」に出演中）`;
-          if(!violations.find(v=>v.name===mate)){
-            violations.push({ name: mate, reason });
-          }
-        }
-      });
-    });
-
-    // 新エントリーの相方情報が既存エントリーメンバーと被らないかも確認
-    newMd.teams.forEach(team=>{
-      team.mates.forEach(mate=>{
-        const mateInExisting = existingEntry.memberDetails.find(m=>m.name===mate);
-        if(mateInExisting){
-          const reason = `${mate} さんが「${existingEntry.label}」に出演中のため、${newMd.name} さんと同時出演不可`;
-          if(!violations.find(v=>v.name===newMd.name)){
-            violations.push({ name: newMd.name, reason });
-          }
-        }
-      });
-    });
-  });
-
-  return violations;
+  return newMemberDetails
+    .filter(m=>m.name && blocked.has(m.name))
+    .map(m=>({name:m.name, reason:blocked.get(m.name)}));
 }
 
 /* ===== CHECK & REGISTER ===== */
@@ -401,7 +346,7 @@ function doCheck(){
     box.innerHTML = `
       <div class="icon">🚫</div>
       <strong>チェリー方式に抵触しています</strong>
-      <div style="border-top:1px solid color-mix(in srgb,var(--accent) 30%,transparent);margin:8px 0"></div>
+      <div style="border-top:1px solid #5a2a3a;margin:8px 0"></div>
       ${violations.map(v=>`
         <div style="margin-bottom:8px">
           <span style="color:var(--accent);font-weight:700">${v.name}</span> は出演不可<br>
