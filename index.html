@@ -29,7 +29,16 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 .sub{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.8}
 
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:18px;max-width:680px;margin-left:auto;margin-right:auto;box-shadow:0 4px 18px rgba(214,40,57,.08)}
-.panel-title{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.panel-title{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:flex;justify-content:between;align-items:center}
+
+/* COUNTER */
+.counter-box {font-size:12px;color:var(--muted);text-align:center;margin-top:-20px;margin-bottom:24px}
+
+/* INPUTS */
+.field-label{font-size:11px;color:var(--muted);margin-bottom:5px;display:block}
+.field-input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:.15s}
+.field-input:focus{border-color:var(--accent)}
+.field-input::placeholder{color:var(--muted)}
 
 /* FORMAT */
 .fmt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px}
@@ -42,12 +51,6 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 .custom-wrap label{font-size:12px;color:var(--muted)}
 .num-input{width:68px;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;outline:none}
 .num-input:focus{border-color:var(--accent)}
-
-/* INPUTS */
-.field-label{font-size:11px;color:var(--muted);margin-bottom:5px;display:block}
-.field-input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:.15s}
-.field-input:focus{border-color:var(--accent)}
-.field-input::placeholder{color:var(--muted)}
 
 /* PERFORMER CARDS */
 #performersWrap{margin-top:16px;display:flex;flex-direction:column;gap:10px}
@@ -64,28 +67,39 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 .btn-primary:hover{opacity:.88}
 .btn-ghost{padding:5px 11px;border:1.5px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);font-family:inherit;font-size:12px;cursor:pointer;transition:.15s}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-csv{border-color:var(--ok);color:var(--ok)}
+.btn-csv:hover{background:#eefbf2;border-color:var(--ok);color:var(--ok)}
+
+/* SEARCH BOX */
+.search-wrap{margin-bottom:14px}
 
 /* RESULT */
 .result-box{border-radius:9px;padding:14px 18px;margin-top:14px;display:none;font-size:13px;line-height:1.8}
 .result-box.ok{display:block;background:#eefbf2;border:1.5px solid var(--ok);color:#1e5e2f}
 .result-box.ng{display:block;background:#fff0f2;border:1.5px solid var(--accent);color:#d62839}
 .result-box .icon{font-size:20px;margin-bottom:4px}
+.error-highlight {color:var(--accent);font-weight:700;background:#fff0f2;padding:2px 4px;border-radius:4px}
 
 /* LIST */
 .entry-list{list-style:none}
 .entry-item{display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--border)}
 .entry-item:last-child{border-bottom:none}
 .entry-badge{flex-shrink:0;font-size:9px;font-weight:700;letter-spacing:.1em;padding:2px 7px;border-radius:4px;background:#ffe1e8;color:#d62839}
+.entry-badge.self-block{background:var(--accent);color:#fff}
+.entry-badge.mate-block{background:#ff96a6;color:#fff}
 .entry-info{flex:1;min-width:0}
 .entry-unit{font-weight:700;font-size:14px}
 .entry-names{font-size:12px;color:var(--muted);margin-top:2px}
 
 /* BLOCKED */
-.blocked-chip{display:inline-flex;flex-direction:column;gap:2px;background:#fff0f2;border:1px solid #ffd0d9;border-radius:7px;padding:7px 12px;margin:4px 4px 4px 0;font-size:13px;vertical-align:top;color:var(--text)}
-.b-name{font-weight:700;color:var(--accent)}
+.blocked-chip{display:inline-flex;align-items:center;gap:8px;background:#surface;border:1px solid #ffd0d9;border-radius:7px;padding:6px 12px;margin:4px 4px 4px 0;font-size:13px;vertical-align:top;color:var(--text)}
+.blocked-container{display:flex;flex-direction:column;gap:8px}
+.blocked-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.blocked-row-title{font-size:11px;font-weight:700;color:var(--muted);width:100%;margin-top:4px}
+.b-name{font-weight:700}
 .b-reason{font-size:11px;color:var(--muted)}
 .no-data{text-align:center;color:var(--muted);font-size:13px;padding:24px 0}
-.clear-row{display:flex;justify-content:flex-end;margin-bottom:10px}
+.action-row{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
 
 @media(max-width:480px){.fmt-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -98,6 +112,8 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
   <h1>チェリー方式チェッカー</h1>
   <p class="sub">エントリーを入力していくだけで、学籍番号をベースにチェリー方式を自動判定します。</p>
 </header>
+
+<div class="counter-box" id="entryCounter">現在：0 組 ／ 実出演者：0 人</div>
 
 <div class="panel" id="secFormat">
   <div class="panel-title">Step 1 ／ 出演形式を選択</div>
@@ -130,12 +146,21 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 
 <div class="panel">
   <div class="panel-title">出演不可者（チェリー方式判定）</div>
-  <div id="blockedArea"></div>
+  <div class="blocked-container" id="blockedArea"></div>
 </div>
 
 <div class="panel">
   <div class="panel-title">登録済みエントリー</div>
-  <div class="clear-row"><button class="btn-ghost" onclick="clearAll()">すべて削除</button></div>
+  
+  <div class="search-wrap">
+    <input type="text" class="field-input" id="searchBox" placeholder="🔍 ユニット名、名前、学籍番号で爆速検索..." oninput="onSearch(this.value)">
+  </div>
+
+  <div class="action-row">
+    <button class="btn-ghost btn-csv" onclick="downloadCSV()">Excel・CSV出力</button>
+    <button class="btn-ghost" onclick="clearAll()">すべて削除</button>
+  </div>
+  
   <ul class="entry-list" id="entryList"></ul>
 </div>
 
@@ -143,6 +168,7 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 <script>
 const KEY = 'cherry_student_id_v3'; 
 let entries = [];
+let searchQuery = ''; // ★追加：検索クエリ保持用
 
 function save(){ localStorage.setItem(KEY, JSON.stringify(entries)) }
 function load(){ try{ const r=localStorage.getItem(KEY); if(r) entries=JSON.parse(r) }catch(e){ entries=[] } }
@@ -215,6 +241,7 @@ function getAllAppearances(allEntries) {
   return apps;
 }
 
+// ★強化：本人ブロックと巻き込まれ相方を識別できるようにデータ拡張
 function calcBlockedNames(){
   const blocked = new Map();
   const apps = getAllAppearances(entries);
@@ -224,18 +251,24 @@ function calcBlockedNames(){
     const performerName = userData.name;
      
     if(userApps.length >= 2){
+      // 本人は「最優先で本人ロック」
       blocked.set(performerCode, {
         name: performerName,
-        reason: "すでに2つの枠に出演しているため"
+        reason: "すでに2枠出演しているため",
+        isSelf: true
       });
        
       userApps.forEach(app=>{
         app.mates.forEach(mate=>{
           if(mate.code !== performerCode){
-            blocked.set(mate.code, {
-              name: mate.name,
-              reason: `${performerName} が2回出演しているため`
-            });
+            // 相方は、まだ「本人ロック」がかかっていない場合のみ「巻き込まれ」として追加
+            if(!blocked.has(mate.code) || !blocked.get(mate.code).isSelf) {
+              blocked.set(mate.code, {
+                name: mate.name,
+                reason: `【${performerName}】が2回出演しているため`,
+                isSelf: false
+              });
+            }
           }
         });
       });
@@ -244,20 +277,22 @@ function calcBlockedNames(){
   return blocked;
 }
 
-// ★【大正解の未来予知ロジック】仮追加した状態でチェリー方式違反が起きないかシミュレートする関数
+// 未来予知ロジック（違反時の情報を詳しく返すように強化）
 function hasCherryViolation(allEntries) {
   const apps = getAllAppearances(allEntries);
 
   for (const entry of allEntries) {
-    // 各グループごとに「2回出演する人」の人数をカウント
-    const count = entry.memberDetails.filter(m => {
+    const twoTimers = entry.memberDetails.filter(m => {
       const app = apps.get(m.code);
       return app && app.list.length >= 2;
-    }).length;
+    });
 
-    // 同じグループ内に2回出演者が「2人以上」存在したら即アウト
-    if (count >= 2) {
-      return { violated: true, label: entry.label };
+    if (twoTimers.length >= 2) {
+      return { 
+        violated: true, 
+        label: entry.label,
+        names: twoTimers.map(m => m.name) // 原因となった複数またぎの人の名前を配列で返す
+      };
     }
   }
   return { violated: false };
@@ -282,48 +317,49 @@ function doCheck(){
 
   const box = document.getElementById('resultBox');
 
-  // 現時点で出演不可（確定ブラックリスト）になっている人が含まれていないかチェック
+  // 現時点で出演不可チェック
   const blocked = calcBlockedNames();
   for(const member of memberDetails){
     if(blocked.has(member.code)){
       const info = blocked.get(member.code);
       box.className = 'result-box ng';
       box.innerHTML = `
-        <div class="icon">🚫</div>
-        <strong>出演できません</strong>
+        <div class="icon">🚫 出演不可エラー</div>
+        <strong>${info.name} さんはエントリーできません</strong>
         <div style="border-top:1px solid #ffd0d9;margin:8px 0"></div>
-        <div style="margin-bottom:8px; font-size:12px;">
-          <span style="color:var(--accent); font-weight:700">• 判定NG：</span>${info.name} さん（${member.code}）は ${info.reason}
+        <div style="font-size:12px; line-height:1.6">
+          理由：${info.reason}<br>
+          <span style="color:var(--muted)">※チェリー方式のルールにより、この学籍番号（${member.code}）は弾かれました。</span>
         </div>`;
       return;
     }
   }
 
-  // ★ ユーザーさん発案の未来予知チェック発動！
+  // 未来予知チェック（★エラー文面を分かりやすく超強化！）
   const newEntry = { id: Date.now()+'', label, memberDetails };
-  const testEntries = [...entries, newEntry]; // 今回の入力を仮追加したシミュレーションデータを作成
+  const testEntries = [...entries, newEntry]; 
   
   const violation = hasCherryViolation(testEntries);
   if (violation.violated) {
     box.className = 'result-box ng';
+    const badGuys = violation.names.map(n => `<span class="error-highlight">${n}</span>`).join(' と ');
     box.innerHTML = `
-      <div class="icon">🚫</div>
-      <strong>チェリー方式違反です</strong>
+      <div class="icon">🚫 チェリー方式違反</div>
+      <strong>同じユニット内に、2回出演する人が複数並んでしまいます！</strong>
       <div style="border-top:1px solid #ffd0d9;margin:8px 0"></div>
-      <div style="margin-bottom:8px; font-size:12px;">
-        <span style="color:var(--accent); font-weight:700">• 判定NG：</span>
-        このエントリーを登録すると、グループ「<strong>${violation.label}</strong>」の中に、2回出演するメンバーが複数（2人以上）並ぶことになり、チェリー方式のルールに違反します。
+      <div style="font-size:12px; line-height:1.6; margin-bottom:4px;">
+        このエントリーを許可すると、グループ「<strong>${violation.label}</strong>」の中で、<br>
+        ${badGuys} の<strong>両方が2回出演</strong>することになり、ルール違反になります。
       </div>`;
     return;
   }
 
-  // すべての鉄壁のチェックをクリアしたら、正式に登録して保存！
+  // 登録
   entries.push(newEntry);
   save();
 
   box.className = 'result-box ok';
-  box.innerHTML = `<div class="icon">🍒</div><strong>問題なし！登録しました</strong><br>
-    <span style="font-size:12px;color:var(--muted)">「${label}」を登録しました。</span>`;
+  box.innerHTML = `<div class="icon">🍒 問題なし！登録完了</div><strong>「${label}」を正常に登録しました。</strong>`;
 
   setTimeout(()=>{
     document.getElementById('secEntry').style.display='none';
@@ -336,17 +372,82 @@ function doCheck(){
   }, 1500);
 }
 
+/* ===== ★追加：検索機能のトリガー ===== */
+function onSearch(val) {
+  searchQuery = val.trim();
+  renderList(); // リストだけ爆速再描画
+}
+
+/* ===== ★追加：CSVダウンロード機能 ===== */
+function downloadCSV() {
+  if(!entries.length) { alert('登録されたエントリーがありません。'); return; }
+  
+  // Excelでの文字化けを防ぐために「BOM」付きのUTF-8にする
+  let csvContent = '\uFEFFエントリー名,形式,学籍番号,名前\n';
+  
+  entries.forEach(e => {
+    const validMembers = e.memberDetails.filter(m => m.code && m.name);
+    const fmt = fmtLabel(validMembers.length);
+    validMembers.forEach(m => {
+      // カンマやクォーテーションのエスケープ処理
+      const l = e.label.replace(/"/g, '""');
+      const code = m.code.replace(/"/g, '""');
+      const name = m.name.replace(/"/g, '""');
+      csvContent += `"${l}","${fmt}","${code}","${name}"\n`;
+    });
+  });
+  
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `cherry_method_entries_${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+}
+
+/* ===== ★追加：カウンター更新機能 ===== */
+function updateCounter() {
+  const totalGroups = entries.length;
+  const uniqueCodes = new Set();
+  let totalSlots = 0;
+  
+  entries.forEach(e => {
+    e.memberDetails.forEach(m => {
+      if(m.code) {
+        uniqueCodes.add(m.code);
+        totalSlots++;
+      }
+    });
+  });
+  
+  document.getElementById('entryCounter').innerHTML = 
+    `現在：<strong>${totalGroups} 組</strong> ／ 実出演者：<strong>${uniqueCodes.size} 人</strong> （延べ人数：${totalSlots}人人）`;
+}
+
 /* ===== RENDER ===== */
 function fmtLabel(n){
   if(n===1)return'ピン';if(n===2)return'コンビ';if(n===3)return'トリオ';return`${n}人`;
 }
 
-function renderAll(){ renderList(); renderBlocked(); }
+function renderAll(){ renderList(); renderBlocked(); updateCounter(); }
 
 function renderList(){
   const el = document.getElementById('entryList');
   if(!entries.length){ el.innerHTML='<li class="no-data">まだエントリーがありません</li>'; return; }
-  el.innerHTML = entries.map(e=>{
+  
+  // ★検索クエリによるフィルタリング機能を追加
+  const filtered = entries.filter(e => {
+    if(!searchQuery) return true;
+    const s = searchQuery.toLowerCase();
+    const labelMatch = e.label.toLowerCase().includes(s);
+    const memberMatch = e.memberDetails.some(m => 
+      m.name.toLowerCase().includes(s) || m.code.toLowerCase().includes(s)
+    );
+    return labelMatch || memberMatch;
+  });
+
+  if(!filtered.length) { el.innerHTML='<li class="no-data">検索結果に一致するエントリーはありません</li>'; return; }
+
+  el.innerHTML = filtered.map(e=>{
     const validMembers = e.memberDetails.filter(m=>m.code && m.name);
     const n = validMembers.length;
     const names = validMembers.map(m=>`${m.name} (${m.code})`).join(' ・ ');
@@ -371,13 +472,35 @@ function renderBlocked(){
     el.innerHTML='<p style="font-size:13px;color:var(--muted)">現在、出演不可者はいません。</p>';
     return;
   }
-  el.innerHTML = `
-    <p style="font-size:11px;color:var(--muted);margin-bottom:10px">ルール上、これ以上の追加エントリーができない方々です。</p>
-    ${[...blocked.values()].map(info=>`
-      <div class="blocked-chip">
-        <span class="b-name">🚫 ${info.name}</span>
-        <span class="b-reason">${info.reason}</span>
-      </div>`).join('')}`;
+
+  // 本人と相方をキレイに分別して表示するUIに変更
+  const selfList = [...blocked.values()].filter(i => i.isSelf);
+  const mateList = [...blocked.values()].filter(i => !i.isSelf);
+
+  let html = '';
+  
+  if(selfList.length > 0) {
+    html += `<div class="blocked-row-title">🚫 2回出演した本人（これ以上いかなる枠でも出演不可）</div><div class="blocked-row">`;
+    html += selfList.map(info => `
+      <div class="blocked-chip" style="border-color:#ffccd3; background:#fff5f6">
+        <span class="entry-badge self-block">本人</span>
+        <span class="b-name">${info.name}</span>
+      </div>`).join('');
+    html += `</div>`;
+  }
+
+  if(mateList.length > 0) {
+    html += `<div class="blocked-row-title" style="margin-top:12px;">⚠️ 巻き込まれた相方（ピンでのみ出演可 / 新しい相方と組むのはNG）</div><div class="blocked-row">`;
+    html += mateList.map(info => `
+      <div class="blocked-chip" style="border-color:#ffe0b5; background:#fffdf9">
+        <span class="entry-badge mate-block" style="background:#f59e0b">相方</span>
+        <span class="b-name">${info.name}</span>
+        <span class="b-reason" style="font-size:10px; color:#b45309">${info.reason}</span>
+      </div>`).join('');
+    html += `</div>`;
+  }
+
+  el.innerHTML = html;
 }
 
 function delEntry(id){
