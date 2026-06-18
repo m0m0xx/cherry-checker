@@ -153,7 +153,7 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
   <div class="panel-title">登録済みエントリー</div>
   
   <div class="search-wrap">
-    <input type="text" class="field-input" id="searchBox" placeholder="🔍 ユニット名、名前、学籍番号で爆速検索..." oninput="onSearch(this.value)">
+    <input type="text" class="field-input" id="searchBox" placeholder="🔍 ユニット名、名前、学籍番号で検索..." oninput="onSearch(this.value)">
   </div>
 
   <div class="action-row">
@@ -313,23 +313,37 @@ function doCheck(){
 
   const box = document.getElementById('resultBox');
 
+  // ブラックリストを元に、理由を明確に分けて即時弾く
   const blocked = calcBlockedNames();
   for(const member of memberDetails){
     if(blocked.has(member.code)){
       const info = blocked.get(member.code);
       box.className = 'result-box ng';
-      box.innerHTML = `
-        <div class="icon">🚫 出演不可エラー</div>
-        <strong>${info.name} さんはエントリーできません</strong>
-        <div style="border-top:1px solid #ffd0d9;margin:8px 0"></div>
-        <div style="font-size:12px; line-height:1.6">
-          理由：${info.reason}<br>
-          <span style="color:var(--muted)">※チェリー方式のルールにより、この学籍番号（${member.code}）はすべての形式で出演不可となります。</span>
-        </div>`;
+      
+      if(info.isSelf) {
+        box.innerHTML = `
+          <div class="icon">🚫 3枠目出演エラー</div>
+          <strong>${info.name} さんはすでに2枠出演しています</strong>
+          <div style="border-top:1px solid #ffd0d9;margin:8px 0"></div>
+          <div style="font-size:12px; line-height:1.6">
+            理由：${info.reason}<br>
+            <span style="color:var(--muted)">※チェリー方式のルールにより、同一人物が3枠以上出演することはできません。</span>
+          </div>`;
+      } else {
+        box.innerHTML = `
+          <div class="icon">🚫 連鎖ブロックエラー</div>
+          <strong>${info.name} さんはエントリーできません</strong>
+          <div style="border-top:1px solid #ffd0d9;margin:8px 0"></div>
+          <div style="font-size:12px; line-height:1.6">
+            理由：${info.reason}<br>
+            <span style="color:var(--muted)">※チェリー方式のルールにより、相方がロックされたため出演不可となります。</span>
+          </div>`;
+      }
       return;
     }
   }
 
+  // 未来予知チェック（中抜き・横スライドの検知）
   const newEntry = { id: Date.now()+'', label, memberDetails };
   const testEntries = [...entries, newEntry]; 
   
@@ -348,6 +362,7 @@ function doCheck(){
     return;
   }
 
+  // 登録
   entries.push(newEntry);
   save();
 
@@ -393,7 +408,6 @@ function downloadCSV() {
   link.click();
 }
 
-/* ===== 🛠️ 修正：人人 → 人 ===== */
 function updateCounter() {
   const totalGroups = entries.length;
   const uniqueCodes = new Set();
@@ -452,7 +466,6 @@ function renderList(){
   }).join('');
 }
 
-/* ===== 🛠️ 修正：相方の解説文面・CSS変数の修正 ===== */
 function renderBlocked(){
   const blocked = calcBlockedNames();
   const el = document.getElementById('blockedArea');
