@@ -408,7 +408,6 @@ function downloadCSV() {
   link.click();
 }
 
-// 🛠️ 修正：組数カウントのみを表示するように変更
 function updateCounter() {
   const totalGroups = entries.length;
   document.getElementById('entryCounter').innerHTML = `現在：<strong>${totalGroups} 組</strong>`;
@@ -425,6 +424,7 @@ function renderList(){
   const el = document.getElementById('entryList');
   if(!entries.length){ el.innerHTML='<li class="no-data">まだエントリーがありません</li>'; return; }
   
+  // 🔍 内部ロジック：学籍番号での検索は生かしたままにする
   const filtered = entries.filter(e => {
     if(!searchQuery) return true;
     const s = searchQuery.toLowerCase();
@@ -440,7 +440,9 @@ function renderList(){
   el.innerHTML = filtered.map(e=>{
     const validMembers = e.memberDetails.filter(m=>m.code && m.name);
     const n = validMembers.length;
-    const names = validMembers.map(m=>`${m.name} (${m.code})`).join(' ・ ');
+    
+    // 🛠️ 修正：表示部分から学籍番号 `(${m.code})` を完全に削除
+    const names = validMembers.map(m=>m.name).join(' ・ ');
     
     return `
       <li class="entry-item">
@@ -468,7 +470,6 @@ function renderBlocked(){
 
   let html = '';
   
-  // 🛠️ 修正：「2回出演した本人」 ➡️ 「2回出演する本人」に変更
   if(selfList.length > 0) {
     html += `<div class="blocked-row-title">🚫 2回出演する本人（これ以上のエントリー不可）</div><div class="blocked-row">`;
     html += selfList.map(info => `
