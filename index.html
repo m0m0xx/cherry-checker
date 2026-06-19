@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>チェリー方式チェッカー</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
@@ -15,7 +14,8 @@ header{text-align:center;margin-bottom:36px}
 h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 .sub{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.8}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:18px;max-width:680px;margin-left:auto;margin-right:auto;box-shadow:0 4px 18px rgba(214,40,57,.08)}
-.panel-title{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.panel-title{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:flex;justify-content:between;align-items:center}
+.counter-box {font-size:14px;font-weight:700;color:var(--text);text-align:center;margin-top:-20px;margin-bottom:24px}
 .field-label{font-size:11px;color:var(--muted);margin-bottom:5px;display:block}
 .field-input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:.15s}
 .field-input:focus{border-color:var(--accent)}
@@ -30,26 +30,58 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 #performersWrap{margin-top:16px;display:flex;flex-direction:column;gap:10px}
 .perf-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden}
 .perf-header{display:flex;align-items:center;gap:10px;padding:12px 14px;flex-wrap:wrap}
-.perf-num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.perf-num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .perf-code-input{width:110px;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;outline:none}
 .perf-name-input{flex:1;min-width:160px;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-family:inherit;font-size:14px;font-weight:700;outline:none}
 .btn-primary{display:block;width:100%;padding:13px;border:none;border-radius:8px;background:linear-gradient(135deg,#ff5d73,#d62839);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-top:18px;letter-spacing:.03em}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed;}
+.btn-ghost{padding:5px 11px;border:1.5px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);font-family:inherit;font-size:12px;cursor:pointer}
+.btn-csv{border-color:var(--ok);color:var(--ok)}
 .result-box{border-radius:9px;padding:14px 18px;margin-top:14px;display:none;font-size:13px;line-height:1.8}
 .result-box.ok{display:block;background:#eefbf2;border:1.5px solid var(--ok);color:#1e5e2f}
 .result-box.ng{display:block;background:#fff0f2;border:1.5px solid var(--accent);color:#d62839}
 .error-highlight {color:var(--accent);font-weight:700;background:#fff0f2;padding:2px 4px;border-radius:4px}
-@media(max-width:480px){.fmt-grid{grid-template-columns:repeat(2,1fr)}}
+.entry-list{list-style:none}
+.entry-item{display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--border)}
+.entry-badge{flex-shrink:0;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:#ffe1e8;color:#d62839}
+.entry-badge.self-block{background:var(--accent);color:#fff}
+.entry-badge.mate-block{background:#ff96a6;color:#fff}
+.entry-info{flex:1;min-width:0}
+.entry-unit{font-weight:700;font-size:14px}
+.entry-names{font-size:12px;color:var(--muted);margin-top:2px}
+.blocked-chip{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border-radius:7px;padding:6px 12px;margin:4px 4px 4px 0;font-size:13px}
+.blocked-container{display:flex;flex-direction:column;gap:8px}
+.blocked-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.blocked-row-title{font-size:11px;font-weight:700;color:var(--muted);width:100%;margin-top:4px}
+.b-name{font-weight:700}
+.b-reason{font-size:11px;color:var(--muted)}
+.no-data{text-align:center;color:var(--muted);font-size:13px;padding:24px 0}
+.action-row{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
+.loading-overlay {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,248,248,0.7);z-index:9999;justify-content:center;align-items:center;font-weight:700;color:var(--accent);}
+
+/* 🔒 自作ポップアップ（モーダル）用のデザイン */
+.c-modal-overlay {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(80,36,45,0.4);z-index:10000;justify-content:center;align-items:center;padding:16px;}
+.c-modal-box {background:var(--surface);border:2px solid var(--border);padding:24px;border-radius:var(--r);max-width:340px;width:100%;text-align:center;box-shadow:0 10px 25px rgba(214,40,57,.15);}
+.c-modal-title {font-size:16px;font-weight:900;color:var(--accent);margin-bottom:10px;}
+.c-modal-msg {font-size:13px;color:var(--text);line-height:1.6;margin-bottom:18px;white-space:pre-wrap;}
+.c-modal-input {width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:16px;text-align:center;outline:none;margin-bottom:15px;}
+.c-modal-input:focus {border-color:var(--accent);}
+.c-modal-btn-row {display:flex;gap:8px;justify-content:center;}
+.c-modal-btn {flex:1;padding:10px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;}
+.c-modal-btn.main {background:var(--accent);color:#fff;}
+.c-modal-btn.sub {background:var(--card);color:var(--muted);border:1.5px solid var(--border);padding:8.5px;}
+.c-modal-btn.ok-btn {background:var(--ok);color:#fff;}
 </style>
 </head>
 <body>
-
+<div class="loading-overlay" id="loading">📡 クラウドと通信中...</div>
 <header>
   <div class="cherry">🍒</div>
   <div class="tag">CHERRY METHOD</div>
   <h1>チェリー方式チェッカー</h1>
-  <p class="sub">入力したメンバー同士で「チェリー方式の違反」が起きないか、その場で一発判定します。</p>
+  <p class="sub">エントリーを入力していくだけで、学籍番号をベースにチェリー方式を自動判定します。学籍番号は半角で入力してください。</p>
 </header>
-
+<div class="counter-box" id="entryCounter">現在：0 組</div>
 <div class="panel" id="secFormat">
   <div class="panel-title">Step 1 ／ 出演形式を選択</div>
   <div class="fmt-grid">
@@ -64,16 +96,74 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
     <span style="font-size:13px;color:var(--muted)">人</span>
   </div>
 </div>
-
 <div class="panel" id="secEntry" style="display:none">
   <div class="panel-title">Step 2 ／ 出演者を入力</div>
+  <div style="margin-bottom:16px">
+    <span class="field-label">エントリー名（コンビ名・ユニット名・芸名など）</span>
+    <input type="text" class="field-input" id="entryName" placeholder="例：ミルクボーイ、ななまがり など">
+  </div>
   <div id="performersWrap"></div>
-  <button class="btn-primary" onclick="doCheck()">チェリー方式判定を実行</button>
+  <button class="btn-primary" id="submitBtn" onclick="doCheck()">チェック ＆ 登録</button>
   <div class="result-box" id="resultBox"></div>
+</div>
+<div class="panel">
+  <div class="panel-title">出演不可者（チェリー方式判定）</div>
+  <div class="blocked-container" id="blockedArea"></div>
+</div>
+<div class="panel">
+  <div class="panel-title">登録済みエントリー</div>
+  <div class="search-wrap"><input type="text" class="field-input" id="searchBox" placeholder="🔍 ユニット名、名前、学籍番号で検索..." oninput="onSearch(this.value)"></div>
+  <div class="action-row">
+    <button class="btn-ghost btn-csv" onclick="openPasswordModal('csv')">Excel・CSV出力</button>
+    <button class="btn-ghost" onclick="openPasswordModal('clear')">すべて削除</button>
+  </div>
+  <ul class="entry-list" id="entryList"></ul>
+</div>
+
+<div id="cAlertModal" class="c-modal-overlay">
+  <div class="c-modal-box">
+    <div class="c-modal-title" id="cAlertTitle">⚠️ お知らせ</div>
+    <div class="c-modal-msg" id="cAlertMsg"></div>
+    <button class="c-modal-btn main" onclick="closeCModal('cAlertModal')">閉じる</button>
+  </div>
+</div>
+
+<div id="cPromptModal" class="c-modal-overlay">
+  <div class="c-modal-box">
+    <div class="c-modal-title" id="cPromptTitle">🔒 管理者認証</div>
+    <div class="c-modal-msg" id="cPromptMsg"></div>
+    <input type="text" class="c-modal-input" id="cPromptInput" placeholder="">
+    <div class="c-modal-btn-row">
+      <button class="c-modal-btn main" id="cPromptSubmitBtn">送信</button>
+      <button class="c-modal-btn sub" onclick="closeCModal('cPromptModal')">キャンセル</button>
+    </div>
+  </div>
 </div>
 
 <script>
+let entries = [];
+let searchQuery = '';
 let curCount = 0;
+let pendingDeleteId = null;
+
+function closeCModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function customAlert(title, msg) {
+  document.getElementById('cAlertTitle').innerText = title;
+  document.getElementById('cAlertMsg').innerText = msg;
+  document.getElementById('cAlertModal').style.display = 'flex';
+}
+
+function showLoading(b){ document.getElementById('loading').style.display = b ? 'flex' : 'none'; }
+
+function fetchCloud() {
+  showLoading(true);
+  google.script.run.withSuccessHandler(function(json) {
+    entries = JSON.parse(json);
+    renderAll();
+    showLoading(false);
+  }).getEntriesFromSheet();
+}
 
 function selectFmt(v){
   document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.toggle('active', b.dataset.n==v));
@@ -84,28 +174,15 @@ function selectFmt(v){
   document.getElementById('secEntry').style.display='block';
   clearResult();
 }
-
-function onCustomN(){
-  curCount = parseInt(document.getElementById('customN').value)||4;
-  buildForm(curCount);
-}
-
+function onCustomN(){ curCount = parseInt(document.getElementById('customN').value)||4; buildForm(curCount); }
 function buildForm(n){
-  const wrap = document.getElementById('performersWrap');
-  wrap.innerHTML = '';
+  const wrap = document.getElementById('performersWrap'); wrap.innerHTML = '';
   for(let i=0;i<n;i++){
-    const card = document.createElement('div');
-    card.className = 'perf-card';
-    card.innerHTML = `
-      <div class="perf-header">
-        <div class="perf-num">${i+1}</div>
-        <input class="perf-code-input" id="pcode_${i}" type="text" placeholder="学籍番号">
-        <input class="perf-name-input" id="pname_${i}" type="text" placeholder="名前">
-      </div>`;
+    const card = document.createElement('div'); card.className = 'perf-card';
+    card.innerHTML = `<div class="perf-header"><div class="perf-num">${i+1}</div><input class="perf-code-input" id="pcode_${i}" type="text" placeholder="学籍番号"><input class="perf-name-input" id="pname_${i}" type="text" placeholder="名前"></div>`;
     wrap.appendChild(card);
   }
 }
-
 function collectForm(){
   const result = [];
   for(let i=0; i<curCount; i++){
@@ -117,28 +194,218 @@ function collectForm(){
   return result;
 }
 
+function getAllAppearances(allEntries) {
+  const apps = new Map();
+  allEntries.forEach(e => {
+    const entryMembers = e.memberDetails.filter(m => m.code && m.name);
+    entryMembers.forEach(m => {
+      if (!apps.has(m.code)) apps.set(m.code, { name: m.name, list: [] });
+      const userObj = apps.get(m.code);
+      if (userObj.list.some(a => a.id === e.id)) return;
+      const mates = entryMembers.filter(o => o.code !== m.code).map(o => ({ code: o.code, name: o.name }));
+      userObj.list.push({ id: e.id, mates });
+    });
+  });
+  return apps;
+}
+
+function calcBlockedNames(){
+  const blocked = new Map();
+  const apps = getAllAppearances(entries);
+  apps.forEach((userData, performerCode)=>{
+    const userApps = userData.list;
+    if(userApps.length >= 2){
+      blocked.set(performerCode, { name: userData.name, reason: "すでに2枠出演しているため", isSelf: true });
+      userApps.forEach(app=>{
+        app.mates.forEach(mate=>{
+          if(mate.code !== performerCode){
+            if(!blocked.has(mate.code) || !blocked.get(mate.code).isSelf) {
+              blocked.set(mate.code, { name: mate.name, reason: `【${userData.name}】が2回出演しているため`, isSelf: false });
+            }
+          }
+        });
+      });
+    }
+  });
+  return blocked;
+}
+
 function doCheck(){
+  const label = document.getElementById('entryName').value.trim();
+  if(!label){ customAlert('⚠️ 入力エラー', 'エントリー名を入力してください。🍒'); return; }
   const memberDetails = collectForm();
-  if(memberDetails.length < curCount){ 
-    alert('全員分の「学籍番号」と「名前」を入力してください。🍒'); 
-    return; 
+  if(!memberDetails.length){ customAlert('⚠️ 入力エラー', '出演者の「学籍番号」と「名前」を入力してください。🍒'); return; }
+  const codes = memberDetails.map(m => m.code);
+  if(new Set(codes).size !== codes.length){ customAlert('⚠️ 重複エラー', '同じエントリー内に同じ学籍番号が重複しています。'); return; }
+
+  const box = document.getElementById('resultBox');
+  const blocked = calcBlockedNames();
+  for(const member of memberDetails){
+    if(blocked.has(member.code)){
+      const info = blocked.get(member.code); box.className = 'result-box ng';
+      box.innerHTML = info.isSelf ? 
+        `<div class="icon">🚫 3枠目出演エラー</div><strong>${info.name} さんはすでに2枠出演しています</strong><div style="border-top:1px solid #ffd0d9;margin:8px 0"></div><div style="font-size:12px">${info.reason}</div>` :
+        `<div class="icon">🚫 連鎖ブロックエラー</div><strong>${info.name} さんはエントリーできません</strong><div style="border-top:1px solid #ffd0d9;margin:8px 0"></div><div style="font-size:12px">${info.reason}</div>`;
+      return;
+    }
   }
 
-  const codes = memberDetails.map(m => m.code);
-  if(new Set(codes).size !== codes.length){
-    alert('同じユニット内に同じ学籍番号が重複しています！');
+  const newEntry = { id: Date.now()+'', label, memberDetails };
+  const testEntries = [...entries, newEntry];
+  
+  const appsTest = getAllAppearances(testEntries);
+  let isViolated = false;
+  let vioLabel = '';
+  let vioNames = [];
+  for (const entry of testEntries) {
+    const twoTimers = entry.memberDetails.filter(m => { const app = appsTest.get(m.code); return app && app.list.length >= 2; });
+    if (twoTimers.length >= 2) { isViolated = true; vioLabel = entry.label; vioNames = twoTimers.map(m => m.name); break; }
+  }
+
+  if (isViolated) {
+    box.className = 'result-box ng';
+    const badGuys = vioNames.map(n => `<span class="error-highlight">${n}</span>`).join(' と ');
+    box.innerHTML = `<div class="icon">🚫 チェリー方式違反</div><strong>同じユニット内に、2回出演する人が複数並んでしまいます！</strong><div style="border-top:1px solid #ffd0d9;margin:8px 0"></div><div style="font-size:12px">グループ「<strong>${vioLabel}</strong>」の中で、${badGuys}の両方が2回出演することになります。</div>`;
     return;
   }
 
-  const box = document.getElementById('resultBox');
-  box.className = 'result-box ok';
-  box.innerHTML = `<div class="icon">🍒 セーフ！</div><strong>このユニット内での重複・違反はありません。</strong>`;
+  showLoading(true);
+  document.getElementById('submitBtn').disabled = true;
+  google.script.run.withSuccessHandler(function(response) {
+    document.getElementById('submitBtn').disabled = false;
+    box.className = 'result-box ok';
+    box.innerHTML = `<div class="icon">🍒 登録完了</div><strong>クラウドへ正常に保存されました。</strong>`;
+    setTimeout(()=>{
+      document.getElementById('secEntry').style.display='none';
+      document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.remove('active'));
+      document.getElementById('entryName').value='';
+      clearResult(); curCount=0;
+      fetchCloud();
+    }, 1500);
+  }).saveEntryToSheet(JSON.stringify(newEntry));
 }
 
-function clearResult(){
-  const b=document.getElementById('resultBox');
-  if(b){ b.className='result-box'; b.innerHTML=''; }
+function onSearch(val) { searchQuery = val.trim(); renderList(); }
+
+// 🔒 モーダルを開く（CSV・全削除・単一削除で共通化）
+function openPasswordModal(type, id = null, label = '') {
+  document.getElementById('cPromptInput').value = '';
+  const inputField = document.getElementById('cPromptInput');
+  
+  if (type === 'csv') {
+    document.getElementById('cPromptTitle').innerText = '🔒 管理者認証';
+    document.getElementById('cPromptMsg').innerText = '【CSV出力】\nパスワードを入力してください：';
+    inputField.type = 'password';
+    inputField.placeholder = 'パスワード';
+    document.getElementById('cPromptSubmitBtn').onclick = function() { executeCSVDownload(); };
+    document.getElementById('cPromptModal').style.display = 'flex';
+  } else if (type === 'clear') {
+    document.getElementById('cPromptTitle').innerText = '🔒 管理者認証';
+    document.getElementById('cPromptMsg').innerText = '【全削除】\n全削除用パスワードを入力してください：';
+    inputField.type = 'password';
+    inputField.placeholder = 'パスワード';
+    document.getElementById('cPromptSubmitBtn').onclick = function() { executeClearAll(); };
+    document.getElementById('cPromptModal').style.display = 'flex';
+  } else if (type === 'single') {
+    // ✨ 通常のエントリー削除用（パスワードを隠さないノーマルテキスト入力へ）
+    pendingDeleteId = id;
+    document.getElementById('cPromptTitle').innerText = '🗑️ エントリーの削除';
+    document.getElementById('cPromptMsg').innerText = `「${label}」を削除します。\n本人確認のため、メンバーの誰か1人の【学籍番号】を入力してください：`;
+    inputField.type = 'text';
+    inputField.placeholder = 'メンバーの学籍番号';
+    document.getElementById('cPromptSubmitBtn').onclick = function() { executeSingleDelete(); };
+    document.getElementById('cPromptModal').style.display = 'flex';
+  }
 }
+
+function executeCSVDownload() {
+  const input = document.getElementById('cPromptInput').value;
+  closeCModal('cPromptModal');
+  showLoading(true);
+  google.script.run.withSuccessHandler(function(json) {
+    const currentEntries = JSON.parse(json);
+    showLoading(false);
+    if(input !== 'cherry2026') { customAlert('❌ 認証エラー', 'パスワードが違います。'); return; }
+    if(!currentEntries.length) { customAlert('📭 お知らせ', 'データがありません。'); return; }
+    
+    let csvContent = '\uFEFFエントリー名,形式,学籍番号,名前\n';
+    currentEntries.forEach(e => {
+      const validMembers = e.memberDetails.filter(m => m.code && m.name);
+      validMembers.forEach(m => {
+        csvContent += `"${e.label.replace(/"/g, '""')}","${fmtLabel(validMembers.length)}","${m.code.replace(/"/g, '""')}","${m.name.replace(/"/g, '""')}"\n`;
+      });
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+    link.download = `cherry_entries_${new Date().toISOString().slice(0,10)}.csv`; link.click();
+  }).getEntriesFromSheet();
+}
+
+function updateCounter() { document.getElementById('entryCounter').innerHTML = `現在：<strong>${entries.length} 組</strong>`; }
+function fmtLabel(n){ if(n===1)return'ピン';if(n===2)return'コンビ';if(n===3)return'トリオ';return`${n}人`; }
+function renderAll(){ renderList(); renderBlocked(); updateCounter(); }
+
+function renderList(){
+  const el = document.getElementById('entryList');
+  if(!entries.length){ el.innerHTML='<li class="no-data">まだエントリーがありません</li>'; return; }
+  const filtered = entries.filter(e => {
+    if(!searchQuery) return true;
+    const s = searchQuery.toLowerCase();
+    return e.label.toLowerCase().includes(s) || e.memberDetails.some(m => m.name.toLowerCase().includes(s) || m.code.toLowerCase().includes(s));
+  });
+  if(!filtered.length) { el.innerHTML='<li class="no-data">一致するデータはありません</li>'; return; }
+
+  el.innerHTML = filtered.map(e=>{
+    const validMembers = e.memberDetails.filter(m=>m.code && m.name);
+    return `<li class="entry-item"><span class="entry-badge">${fmtLabel(validMembers.length)}</span><div class="entry-info"><div class="entry-unit">${e.label}</div><div class="entry-names">${validMembers.map(m=>m.name).join(' ・ ')}</div></div><button class="btn-ghost" onclick="openPasswordModal('single', '${e.id}', '${e.label}')">削除</button></li>`;
+  }).join('');
+}
+
+function renderBlocked(){
+  const blocked = calcBlockedNames(); const el = document.getElementById('blockedArea'); if(!el) return;
+  if(!blocked.size){ el.innerHTML='<p style="font-size:13px;color:var(--muted)">現在、出演不可者はいません。</p>'; return; }
+  const selfList = [...blocked.values()].filter(i => i.isSelf); const mateList = [...blocked.values()].filter(i => !i.isSelf);
+  let html = '';
+  if(selfList.length > 0) {
+    html += `<div class="blocked-row-title">🚫 2回出演する本人</div><div class="blocked-row">` + selfList.map(info => `<div class="blocked-chip" style="border-color:#ffccd3; background:#fff5f6"><span class="entry-badge self-block">本人</span><span class="b-name">${info.name}</span></div>`).join('') + `</div>`;
+  }
+  if(mateList.length > 0) {
+    html += `<div class="blocked-row-title" style="margin-top:12px;">⚠️ 巻き込まれた相方</div><div class="blocked-row">` + mateList.map(info => `<div class="blocked-chip" style="border-color:#ffe0b5; background:#fffdf9"><span class="entry-badge mate-block" style="background:#f59e0b">相方</span><span class="b-name">${info.name}</span><span class="b-reason" style="font-size:10px; color:#b45309">${info.reason}</span></div>`).join('') + `</div>`;
+  }
+  el.innerHTML = html;
+}
+
+// ✨ 学籍番号チェック付きの通常削除実行
+function executeSingleDelete() {
+  const codeInput = document.getElementById('cPromptInput').value.trim();
+  if(!codeInput) { customAlert('⚠️ 入力エラー', '学籍番号を入力してください。'); return; }
+  
+  closeCModal('cPromptModal');
+  showLoading(true);
+  
+  google.script.run.withSuccessHandler(function(result) {
+    if (result === "AUTH_FAILED") {
+      showLoading(false);
+      customAlert('❌ 認証エラー', '入力された学籍番号はこのエントリーのメンバーのものではありません。\n削除できませんでした。');
+      return;
+    }
+    fetchCloud();
+  }).deleteEntryFromSheet(pendingDeleteId, codeInput);
+}
+
+function executeClearAll(){
+  const pass = document.getElementById('cPromptInput').value;
+  closeCModal('cPromptModal');
+  showLoading(true);
+  google.script.run.withSuccessHandler(function(res) {
+    if(res === "AUTH_FAILED") { customAlert("❌ 認証エラー", "パスワードが違います。"); showLoading(false); return; }
+    fetchCloud();
+  }).clearAllEntriesFromSheet(pass);
+}
+
+function clearResult(){ const b=document.getElementById('resultBox'); if(b){ b.className='result-box'; b.innerHTML=''; } }
+
+fetchCloud();
 </script>
 </body>
 </html>
