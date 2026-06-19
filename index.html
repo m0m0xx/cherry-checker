@@ -57,7 +57,6 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 .b-reason{font-size:11px;color:var(--muted)}
 .no-data{text-align:center;color:var(--muted);font-size:13px;padding:24px 0}
 .action-row{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
-.loading-overlay {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,248,248,0.7);z-index:9999;justify-content:center;align-items:center;font-weight:700;color:var(--accent);}
 
 /* 🔒 自作ポップアップ（モーダル）用のデザイン */
 .c-modal-overlay {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(80,36,45,0.4);z-index:10000;justify-content:center;align-items:center;padding:16px;}
@@ -74,14 +73,16 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 </style>
 </head>
 <body>
-<div class="loading-overlay" id="loading">📡 クラウドと通信中...</div>
+
 <header>
   <div class="cherry">🍒</div>
   <div class="tag">CHERRY METHOD</div>
   <h1>チェリー方式チェッカー</h1>
   <p class="sub">エントリーを入力していくだけで、学籍番号をベースにチェリー方式を自動判定します。学籍番号は半角で入力してください。</p>
 </header>
+
 <div class="counter-box" id="entryCounter">現在：0 組</div>
+
 <div class="panel" id="secFormat">
   <div class="panel-title">Step 1 ／ 出演形式を選択</div>
   <div class="fmt-grid">
@@ -96,6 +97,7 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
     <span style="font-size:13px;color:var(--muted)">人</span>
   </div>
 </div>
+
 <div class="panel" id="secEntry" style="display:none">
   <div class="panel-title">Step 2 ／ 出演者を入力</div>
   <div style="margin-bottom:16px">
@@ -106,10 +108,12 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
   <button class="btn-primary" id="submitBtn" onclick="doCheck()">チェック ＆ 登録</button>
   <div class="result-box" id="resultBox"></div>
 </div>
+
 <div class="panel">
   <div class="panel-title">出演不可者（チェリー方式判定）</div>
   <div class="blocked-container" id="blockedArea"></div>
 </div>
+
 <div class="panel">
   <div class="panel-title">登録済みエントリー</div>
   <div class="search-wrap"><input type="text" class="field-input" id="searchBox" placeholder="🔍 ユニット名、名前、学籍番号で検索..." oninput="onSearch(this.value)"></div>
@@ -123,16 +127,27 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 <div id="cAlertModal" class="c-modal-overlay">
   <div class="c-modal-box">
     <div class="c-modal-title" id="cAlertTitle">⚠️ お知らせ</div>
-    <div class="c-modal-msg" id="cAlertMsg"></div>
+    <div class="c-modal-msg" id="cAlertMsg">ここにメッセージが入ります</div>
     <button class="c-modal-btn main" onclick="closeCModal('cAlertModal')">閉じる</button>
+  </div>
+</div>
+
+<div id="cConfirmModal" class="c-modal-overlay">
+  <div class="c-modal-box">
+    <div class="c-modal-title" style="color:var(--text);">確認</div>
+    <div class="c-modal-msg" id="cConfirmMsg">本当に実行しますか？</div>
+    <div class="c-modal-btn-row">
+      <button class="c-modal-btn main" id="cConfirmYesBtn">はい</button>
+      <button class="c-modal-btn sub" onclick="closeCModal('cConfirmModal')">いいえ</button>
+    </div>
   </div>
 </div>
 
 <div id="cPromptModal" class="c-modal-overlay">
   <div class="c-modal-box">
-    <div class="c-modal-title" id="cPromptTitle">🔒 管理者認証</div>
-    <div class="c-modal-msg" id="cPromptMsg"></div>
-    <input type="text" class="c-modal-input" id="cPromptInput" placeholder="">
+    <div class="c-modal-title">🔒 管理者認証</div>
+    <div class="c-modal-msg" id="cPromptMsg">パスワードを入力してください</div>
+    <input type="password" class="c-modal-input" id="cPromptInput" placeholder="パスワード">
     <div class="c-modal-btn-row">
       <button class="c-modal-btn main" id="cPromptSubmitBtn">送信</button>
       <button class="c-modal-btn sub" onclick="closeCModal('cPromptModal')">キャンセル</button>
@@ -141,28 +156,32 @@ h1{font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--text)}
 </div>
 
 <script>
+const ADMIN_PASSWORD = 'cherry2026';
+const STORAGE_KEY = 'cherry_student_id_v3';
 let entries = [];
 let searchQuery = '';
 let curCount = 0;
 let pendingDeleteId = null;
 
+// LocalStorage 保存＆読み込み
+function saveLocal(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+function loadLocal(){
+  try{
+    const r = localStorage.getItem(STORAGE_KEY);
+    entries = r ? JSON.parse(r) : [];
+  } catch(e) {
+    entries = [];
+  }
+}
+
+// 自作ポップアップを閉じる関数
 function closeCModal(id) { document.getElementById(id).style.display = 'none'; }
 
+// alertの代わりに出す関数
 function customAlert(title, msg) {
   document.getElementById('cAlertTitle').innerText = title;
   document.getElementById('cAlertMsg').innerText = msg;
   document.getElementById('cAlertModal').style.display = 'flex';
-}
-
-function showLoading(b){ document.getElementById('loading').style.display = b ? 'flex' : 'none'; }
-
-function fetchCloud() {
-  showLoading(true);
-  google.script.run.withSuccessHandler(function(json) {
-    entries = JSON.parse(json);
-    renderAll();
-    showLoading(false);
-  }).getEntriesFromSheet();
 }
 
 function selectFmt(v){
@@ -174,7 +193,9 @@ function selectFmt(v){
   document.getElementById('secEntry').style.display='block';
   clearResult();
 }
+
 function onCustomN(){ curCount = parseInt(document.getElementById('customN').value)||4; buildForm(curCount); }
+
 function buildForm(n){
   const wrap = document.getElementById('performersWrap'); wrap.innerHTML = '';
   for(let i=0;i<n;i++){
@@ -183,6 +204,7 @@ function buildForm(n){
     wrap.appendChild(card);
   }
 }
+
 function collectForm(){
   const result = [];
   for(let i=0; i<curCount; i++){
@@ -269,76 +291,56 @@ function doCheck(){
     return;
   }
 
-  showLoading(true);
-  document.getElementById('submitBtn').disabled = true;
-  google.script.run.withSuccessHandler(function(response) {
-    document.getElementById('submitBtn').disabled = false;
-    box.className = 'result-box ok';
-    box.innerHTML = `<div class="icon">🍒 登録完了</div><strong>クラウドへ正常に保存されました。</strong>`;
-    setTimeout(()=>{
-      document.getElementById('secEntry').style.display='none';
-      document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.remove('active'));
-      document.getElementById('entryName').value='';
-      clearResult(); curCount=0;
-      fetchCloud();
-    }, 1500);
-  }).saveEntryToSheet(JSON.stringify(newEntry));
+  // 💾 ローカル保存処理
+  entries.push(newEntry);
+  saveLocal();
+
+  box.className = 'result-box ok';
+  box.innerHTML = `<div class="icon">🍒 登録完了</div><strong>「${label}」を正常に登録しました。</strong>`;
+  
+  setTimeout(()=>{
+    document.getElementById('secEntry').style.display='none';
+    document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('entryName').value='';
+    clearResult(); curCount=0;
+    renderAll();
+  }, 1500);
 }
 
 function onSearch(val) { searchQuery = val.trim(); renderList(); }
 
-// 🔒 モーダルを開く（CSV・全削除・単一削除で共通化）
-function openPasswordModal(type, id = null, label = '') {
+// 🔒 パスワード入力画面（CSV・全削除 共通）を開く関数
+function openPasswordModal(type) {
   document.getElementById('cPromptInput').value = '';
-  const inputField = document.getElementById('cPromptInput');
+  document.getElementById('cPromptModal').style.display = 'flex';
   
   if (type === 'csv') {
-    document.getElementById('cPromptTitle').innerText = '🔒 管理者認証';
     document.getElementById('cPromptMsg').innerText = '【CSV出力】\nパスワードを入力してください：';
-    inputField.type = 'password';
-    inputField.placeholder = 'パスワード';
     document.getElementById('cPromptSubmitBtn').onclick = function() { executeCSVDownload(); };
-    document.getElementById('cPromptModal').style.display = 'flex';
-  } else if (type === 'clear') {
-    document.getElementById('cPromptTitle').innerText = '🔒 管理者認証';
+  } else {
     document.getElementById('cPromptMsg').innerText = '【全削除】\n全削除用パスワードを入力してください：';
-    inputField.type = 'password';
-    inputField.placeholder = 'パスワード';
     document.getElementById('cPromptSubmitBtn').onclick = function() { executeClearAll(); };
-    document.getElementById('cPromptModal').style.display = 'flex';
-  } else if (type === 'single') {
-    // ✨ 通常のエントリー削除用（パスワードを隠さないノーマルテキスト入力へ）
-    pendingDeleteId = id;
-    document.getElementById('cPromptTitle').innerText = '🗑️ エントリーの削除';
-    document.getElementById('cPromptMsg').innerText = `「${label}」を削除します。\n本人確認のため、メンバーの誰か1人の【学籍番号】を入力してください：`;
-    inputField.type = 'text';
-    inputField.placeholder = 'メンバーの学籍番号';
-    document.getElementById('cPromptSubmitBtn').onclick = function() { executeSingleDelete(); };
-    document.getElementById('cPromptModal').style.display = 'flex';
   }
 }
 
+// 実際のCSV処理
 function executeCSVDownload() {
   const input = document.getElementById('cPromptInput').value;
   closeCModal('cPromptModal');
-  showLoading(true);
-  google.script.run.withSuccessHandler(function(json) {
-    const currentEntries = JSON.parse(json);
-    showLoading(false);
-    if(input !== 'cherry2026') { customAlert('❌ 認証エラー', 'パスワードが違います。'); return; }
-    if(!currentEntries.length) { customAlert('📭 お知らせ', 'データがありません。'); return; }
-    
-    let csvContent = '\uFEFFエントリー名,形式,学籍番号,名前\n';
-    currentEntries.forEach(e => {
-      const validMembers = e.memberDetails.filter(m => m.code && m.name);
-      validMembers.forEach(m => {
-        csvContent += `"${e.label.replace(/"/g, '""')}","${fmtLabel(validMembers.length)}","${m.code.replace(/"/g, '""')}","${m.name.replace(/"/g, '""')}"\n`;
-      });
+  
+  if(input !== ADMIN_PASSWORD) { customAlert('❌ 認証エラー', 'パスワードが違います。'); return; }
+  if(!entries.length) { customAlert('📭 お知らせ', 'データがありません。'); return; }
+  
+  let csvContent = '\uFEFFエントリー名,形式,学籍番号,名前\n';
+  entries.forEach(e => {
+    const validMembers = e.memberDetails.filter(m => m.code && m.name);
+    validMembers.forEach(m => {
+      csvContent += `"${e.label.replace(/"/g, '""')}","${fmtLabel(validMembers.length)}","${m.code.replace(/"/g, '""')}","${m.name.replace(/"/g, '""')}"\n`;
     });
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
-    link.download = `cherry_entries_${new Date().toISOString().slice(0,10)}.csv`; link.click();
-  }).getEntriesFromSheet();
+  });
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+  link.download = `cherry_entries_${new Date().toISOString().slice(0,10)}.csv`; link.click();
 }
 
 function updateCounter() { document.getElementById('entryCounter').innerHTML = `現在：<strong>${entries.length} 組</strong>`; }
@@ -357,7 +359,7 @@ function renderList(){
 
   el.innerHTML = filtered.map(e=>{
     const validMembers = e.memberDetails.filter(m=>m.code && m.name);
-    return `<li class="entry-item"><span class="entry-badge">${fmtLabel(validMembers.length)}</span><div class="entry-info"><div class="entry-unit">${e.label}</div><div class="entry-names">${validMembers.map(m=>m.name).join(' ・ ')}</div></div><button class="btn-ghost" onclick="openPasswordModal('single', '${e.id}', '${e.label}')">削除</button></li>`;
+    return `<li class="entry-item"><span class="entry-badge">${fmtLabel(validMembers.length)}</span><div class="entry-info"><div class="entry-unit">${e.label}</div><div class="entry-names">${validMembers.map(m=>m.name).join(' ・ ')}</div></div><button class="btn-ghost" onclick="askDelEntry('${e.id}', '${e.label}')">削除</button></li>`;
   }).join('');
 }
 
@@ -375,37 +377,37 @@ function renderBlocked(){
   el.innerHTML = html;
 }
 
-// ✨ 学籍番号チェック付きの通常削除実行
-function executeSingleDelete() {
-  const codeInput = document.getElementById('cPromptInput').value.trim();
-  if(!codeInput) { customAlert('⚠️ 入力エラー', '学籍番号を入力してください。'); return; }
-  
-  closeCModal('cPromptModal');
-  showLoading(true);
-  
-  google.script.run.withSuccessHandler(function(result) {
-    if (result === "AUTH_FAILED") {
-      showLoading(false);
-      customAlert('❌ 認証エラー', '入力された学籍番号はこのエントリーのメンバーのものではありません。\n削除できませんでした。');
-      return;
-    }
-    fetchCloud();
-  }).deleteEntryFromSheet(pendingDeleteId, codeInput);
+// 🗑️ 通常削除の確認ポップアップを開く
+function askDelEntry(id, label) {
+  pendingDeleteId = id;
+  document.getElementById('cConfirmMsg').innerText = `エントリー「${label}」を\n削除してもよろしいですか？`;
+  document.getElementById('cConfirmModal').style.display = 'flex';
+  document.getElementById('cConfirmYesBtn').onclick = function() { executeSingleDelete(); };
 }
 
+// 実際の通常削除
+function executeSingleDelete() {
+  closeCModal('cConfirmModal');
+  entries = entries.filter(e => e.id !== pendingDeleteId);
+  saveLocal();
+  renderAll();
+}
+
+// 実際の全削除
 function executeClearAll(){
   const pass = document.getElementById('cPromptInput').value;
   closeCModal('cPromptModal');
-  showLoading(true);
-  google.script.run.withSuccessHandler(function(res) {
-    if(res === "AUTH_FAILED") { customAlert("❌ 認証エラー", "パスワードが違います。"); showLoading(false); return; }
-    fetchCloud();
-  }).clearAllEntriesFromSheet(pass);
+  if(pass !== ADMIN_PASSWORD) { customAlert("❌ 認証エラー", "パスワードが違います。"); return; }
+  entries = [];
+  saveLocal();
+  renderAll();
 }
 
 function clearResult(){ const b=document.getElementById('resultBox'); if(b){ b.className='result-box'; b.innerHTML=''; } }
 
-fetchCloud();
+// 起動時に初回データ読み込み
+loadLocal();
+renderAll();
 </script>
 </body>
 </html>
